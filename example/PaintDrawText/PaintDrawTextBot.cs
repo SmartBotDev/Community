@@ -8,14 +8,14 @@ using SmartBot.Control;
 using SmartBot.DataModel;
 using SmartBot.Util.Parser;
 using SmartBot.SmartAction;
-using SmartBot.Api.Windows;
-using SmartBot.Api.Windows.Input;
 
-namespace PaintDrawSine
+
+namespace PaintDrawText
 {
-    public class PaintDrawSineBot : Bot
+    public class PaintDrawTextBot : Bot
     {
-        private const string CANVAS_DRAW = "//Window[@class='MSPaintApp']/Pane[@automation-id='59648']";
+        private const string PANEL_USANDO_A_FERRAMENTA_TEXTO_EM_TELA = "//Window[@class='MSPaintApp']/Pane[@automation-id='59648']/Pane[@class='Afx:be0000:8']";
+
         private const string REDIMENSIONAR = "//Custom[@name='Início']/ToolBar[@name='Imagem']/Button[@name='Redimensionar']";
         private const string RADIO_PIXEL = "//Window[@class='MSPaintApp']/Window[@class='#32770']/RadioButton[@automation-id='1102']";
         private const string CHECK_BOX_MANTER_PROPORCAO = "//Window[@class='MSPaintApp']/Window[@class='#32770']/CheckBox[@automation-id='1100']";
@@ -24,21 +24,43 @@ namespace PaintDrawSine
         private const string INPUT_HEIGHT = "//Window[@class='MSPaintApp']/Window[@class='#32770']/Edit[@automation-id='1020']";
 
         private const string REDIMENSIONAR_OK = "//Window[@class='MSPaintApp']/Window[@class='#32770']/Button[@automation-id='1']";
-        private const string LAPIS = "//ToolBar[@name='Ferramentas']/Button[@name='Lápis']";
 
         protected override void Run()
         {
-            var app = Application.Open("mspaint.exe");
+            var mspaint = Application.Open("mspaint.exe");
 
-            var canvasDraw = SmartAction(new FindElement(app, CANVAS_DRAW));
+            var pane1 = SmartAction(new FindElement(mspaint, "//Window[@class='MSPaintApp']/Pane[@automation-id='59648']/Pane"));
 
-            RedimensionarCanvas(app, canvasDraw);
-            DrawSineLowLevel(app, canvasDraw);
+            RedimensionarCanvas(mspaint, pane1);
 
-            Wait(10000);
+            SmartAction(new Click(mspaint, "//Custom[@name='Início']/ToolBar[@name='Ferramentas']/Button[@name='Texto']"));
 
-            app.Close();
+            //Aqui o document1 aparecerá pela primeira vez na tela
+            SmartAction(new Click(pane1, coord: new Coord(305, 109)));
+
+            // Obtém o elemento resultante do click anterior
+            var document1 = SmartAction(new FindElement(mspaint, "//Document[@automation-id='114']"));
+            SmartAction(new SetText(document1, "Teste de escrita"));
+
+            //Aqui o document1 sumirá da tela
+            SmartAction(new Click(pane1, coord: new Coord(339, 43)));
+
+            //Aqui o document1 aparecerá novamente na tela
+            SmartAction(new Click(pane1, coord: new Coord(339, 43)));
+            SmartAction(new SetText(document1, "Teste"));
+
+            //Aqui o document1 sumirá da tela
+            SmartAction(new Click(pane1, coord: new Coord(100, 43)));
+
+            //Aqui o document1 aparecerá novamente na tela
+            SmartAction(new Click(pane1, coord: new Coord(100, 43)));
+            SmartAction(new SetText(document1, "Teste 2"));
+
+            Wait(1000);
+
+            mspaint.Close();
         }
+
         private void RedimensionarCanvas(ApplicationRoot app, Element canvasDraw)
         {
             SmartAction(new Click(app, REDIMENSIONAR));
@@ -48,36 +70,6 @@ namespace PaintDrawSine
             SmartAction(new SetText(app, INPUT_WIDTH, canvasDraw.GetRect().Width.ToString()));
             SmartAction(new SetText(app, INPUT_HEIGHT, canvasDraw.GetRect().Height.ToString()));
             SmartAction(new Click(app, REDIMENSIONAR_OK));
-        }
-
-        private void DrawSineLowLevel(ApplicationRoot app, Element canvasDraw)
-        {
-            SmartAction(new Click(app, LAPIS));
-
-            app.SetFocus();
-            Wait(200);
-
-            var rect = canvasDraw.GetRect();
-            var twoPI = Math.PI * 20.0;
-            var height = ((rect.Y + rect.Height) / 2) - 10;
-            var sineHeight = height / 2;
-            var width = rect.Width;
-
-            var initialX = 10;
-            var initialY = sineHeight * Math.Sin((twoPI * initialX) / width) + (sineHeight + rect.Y + 20);
-
-            Mouse.ButtonUp();
-            Mouse.Move(initialX, initialY);
-            Mouse.ButtonDown(MouseButton.Left);
-
-            for (var x = initialX; x < width; x++)
-            {
-                var y = sineHeight * Math.Sin((twoPI * x) / width) + (sineHeight + rect.Y + 20);
-                Mouse.Move(x, y);
-                Wait(1);
-            }
-
-            Mouse.ButtonUp(MouseButton.Left);
         }
     }
 }

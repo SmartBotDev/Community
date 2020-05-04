@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using SmartBot.Api.Windows.Native;
 
-namespace ChromeNaviation
+namespace PaintDrawText
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            new ChromeNavigationBot().Execute();
+            new PaintDrawTextBot().Execute();
         }
     }
 }

@@ -28,7 +28,7 @@ namespace NotepadEdit
             Wait(3000); // Time to human see the console log
         }
 
-        private void WriteWelcomeText(Application mspaint, string textEditorWriteWelcomeText)
+        private void WriteWelcomeText(ApplicationRoot mspaint, string textEditorWriteWelcomeText)
         {
             SmartAction(new SetText(mspaint, TEXT_EDITOR, "Welcome to your first bot"));
             Wait(2000); // Time to human reader

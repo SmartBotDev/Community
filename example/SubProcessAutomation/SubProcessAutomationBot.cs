@@ -8,22 +8,21 @@ using SmartBot.Control;
 using SmartBot.DataModel;
 using SmartBot.Util.Parser;
 using SmartBot.SmartAction;
-using SmartBot.Api.Browser;
+using System.Threading;
 
-namespace ChromeNaviation
+namespace SubProcessAutomation
 {
-    public class ChromeNavigationBot : Bot
+    public class SubProcessAutomationBot : Bot
     {
         // Replace content with your bot actions
         protected override void Run()
         {
-            var browser = GoogleChrome.Open();
+            var launcher = Application.Open(@"Assets/launcher.bat");
 
-            browser.NavigateTo("http://google.com");
-            browser.NavigateTo("http://facebook.com.br");
-            browser.NavigateTo("http://g1.globo.com");
+            Thread.Sleep(2000);
+            var mspaint = Application.Open(@"mspaint.exe");
 
-            browser.Close();
+            mspaint.ShowLayoutXml(true);
 
             Wait(3000); // Time to human see the console log
         }
